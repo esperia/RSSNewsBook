@@ -2,3 +2,6 @@
 /.gradle
 /gradle
 /.idea
+/server
+!/server/eula.txt
+/build

@@ -1,0 +1,8 @@
+name: MyHelloPlugin
+main: com.esperia09.bukkit.hello.HelloPlugin
+version: 0.0.1
+author: neske
+commands:
+  mytest:
+  description: mytest Example
+  usage: /<command>
