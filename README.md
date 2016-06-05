@@ -14,3 +14,17 @@ Usage
 
 
 
+Debug
+---------------------------------------
+
+* spigot-1.9.2.jar put on /path/to/project\_root/libs/
+* run server:
+
+```sh
+cd /path/to/project_root/server/
+./run-debug.sh
+```
+
+* Run debug on IntelliJ. Follow [IntelliJ: Debug Your Plugin](https://www.spigotmc.org/wiki/intellij-debug-your-plugin/) article.
+
+
