@@ -1,4 +1,4 @@
-group 'com.esperia09.bukkit.hello'
+group 'com.esperia09.rssnewsbook'
 version '0.0.1-SNAPSHOT'
 
 apply plugin: 'java'
