@@ -2,6 +2,8 @@ package com.esperia09.rssnewsbook;
 
 import com.esperia09.rssnewsbook.compat.ICraftBookPageManager;
 import com.esperia09.rssnewsbook.compat.CompatManager;
+import com.esperia09.rssnewsbook.data.config.MyConfig;
+import com.esperia09.rssnewsbook.data.db.Connector;
 import com.esperia09.rssnewsbook.rest.Api;
 import com.esperia09.rssnewsbook.rss.Feed;
 import com.esperia09.rssnewsbook.rss.FeedMessage;
@@ -18,19 +20,46 @@ import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.BookMeta;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.sql.SQLException;
+
 public class RSSNewsBookPlugin extends JavaPlugin {
     private CompatManager cm;
+    private MyConfig config = new MyConfig();
 
     @Override
     public void onEnable() {
         super.onEnable();
         try {
-            cm = new CompatManager(this);
+            CompatManager cm = new CompatManager(this);
+
+            this.cm = cm;
         } catch (final Exception e) {
-            e.printStackTrace();
             this.getLogger().severe("Could not find support for this CraftBukkit version.");
             this.getLogger().info("Check for updates at URL HERE");
+            e.printStackTrace();
             this.setEnabled(false);
+        }
+
+        config.init(this);
+
+        // connect to database
+        try {
+            Connector.getInstance().connect(this);
+        } catch (SQLException e) {
+            e.printStackTrace();
+            this.getLogger().severe(e.getMessage());
+            this.setEnabled(false);
+        }
+    }
+
+    @Override
+    public void onDisable() {
+        super.onDisable();
+
+        try {
+            Connector.getInstance().disconnect(this);
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
     }
 
