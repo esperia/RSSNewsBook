@@ -2,8 +2,6 @@
 /.gradle
 /gradle
 /.idea
-/server/*
-!/server/run-debug.sh
-!/server/eula.txt
+/server-*
 /libs
 /build
