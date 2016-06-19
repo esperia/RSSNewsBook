@@ -48,6 +48,12 @@ public class Api {
                 plugin.getServer().getScheduler().runTask(plugin, new Runnable() {
                     @Override
                     public void run() {
+                        if (result == null) {
+                            if (tr == null) {
+                                throw new IllegalStateException("This is Plugin's bug!!");
+                            }
+                            return;
+                        }
                         callback.onFinish(result, tr);
                     }
                 });
