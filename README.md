@@ -4,7 +4,9 @@ RSSNewsBook
 
 The plugin is bukkit/spigot plugin.
 
-* Tested on v1.9.2
+* Tested:
+  * Spigot v1.10
+  * Spigot v1.9.2
 
 Usage
 ---------------------------------------
@@ -21,8 +23,8 @@ Debug
 * run server:
 
 ```sh
-cd /path/to/project_root/server/
-./run-debug.sh
+cd /path/to/project_root/
+./run-debug.sh 1.9.2
 ```
 
 * Run debug on IntelliJ. Follow [IntelliJ: Debug Your Plugin](https://www.spigotmc.org/wiki/intellij-debug-your-plugin/) article.

@@ -21,7 +21,9 @@
         <CLASSES>
           <root url="jar://$MODULE_DIR$/libs/spigot-1.10.jar!/" />
         </CLASSES>
-        <JAVADOC />
+        <JAVADOC>
+          <root url="https://hub.spigotmc.org/javadocs/spigot/" />
+        </JAVADOC>
         <SOURCES />
       </library>
     </orderEntry>
@@ -45,5 +47,6 @@
         <SOURCES />
       </library>
     </orderEntry>
+    <orderEntry type="library" name="Gradle: joda-time:joda-time:2.9.4" level="project" />
   </component>
 </module>

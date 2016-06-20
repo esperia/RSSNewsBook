@@ -3,6 +3,6 @@ main: com.esperia09.rssnewsbook.RSSNewsBookPlugin
 version: 0.0.1
 author: neske
 commands:
-  torssnews:
-    description: Written book to RSS News book
-    usage: /torssnews after hold "Written book" in your's main hand.
+  rssnews:
+    description: Convert Written book to RSS News book
+    usage: /rssnews after hold "Written book" in your's main hand.

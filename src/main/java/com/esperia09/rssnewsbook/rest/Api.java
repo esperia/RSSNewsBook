@@ -29,9 +29,7 @@ public class Api {
 
     // ------------------------------------------------------------------------
 
-    public void reqReadRss(final Plugin plugin, final ApiCallback<Feed> callback) {
-        final String url = "http://rss.rssad.jp/rss/itm/2.0/netlab.xml";
-
+    public void reqReadRss(final Plugin plugin, final String url, final ApiCallback<Feed> callback) {
         plugin.getServer().getScheduler().runTaskAsynchronously(plugin, new Runnable() {
             @Override
             public void run() {
