@@ -7,4 +7,6 @@ public interface ConfigKeys {
     String DB_USERNAME = "db.username";
     String DB_URL = "db.url";
     String DB_PASSWORD = "db.password";
+
+    String NEWS_EXPIRE = "news.expire";
 }

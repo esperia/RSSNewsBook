@@ -10,27 +10,27 @@ import org.bukkit.event.inventory.*;
  */
 public class MyListener implements Listener {
 
-    // Cannot invoke when Inventory opened. Why?
-    @EventHandler
-    public void onInventoryOpen(InventoryOpenEvent e) {
-        System.out.println("MyListener: onInventoryOpen");
-        Bukkit.broadcastMessage("Welcome to the server!");
-    }
-
-    // OK
-    @EventHandler
-    public void onInventoryClose(InventoryCloseEvent e) {
-        System.out.println("MyListener: onInventoryClose");
-        Bukkit.broadcastMessage("Welcome to the server!");
-    }
-
-    // OK
-    @EventHandler
-    public void onInventoryClick(InventoryClickEvent e) {
-        System.out.println("MyListener: onInventoryClick");
-        Bukkit.broadcastMessage("Welcome to the server!");
-    }
-
+//    // Cannot invoke when Inventory opened. Why?
+//    @EventHandler
+//    public void onInventoryOpen(InventoryOpenEvent e) {
+//        System.out.println("MyListener: onInventoryOpen");
+//        Bukkit.broadcastMessage("Welcome to the server!");
+//    }
+//
+//    // OK
+//    @EventHandler
+//    public void onInventoryClose(InventoryCloseEvent e) {
+//        System.out.println("MyListener: onInventoryClose");
+//        Bukkit.broadcastMessage("Welcome to the server!");
+//    }
+//
+//    // OK
+//    @EventHandler
+//    public void onInventoryClick(InventoryClickEvent e) {
+//        System.out.println("MyListener: onInventoryClick");
+//        Bukkit.broadcastMessage("Welcome to the server!");
+//    }
+//
 //    // OK,
 //    @EventHandler
 //    public void onInventoryCreative(InventoryCreativeEvent e) {

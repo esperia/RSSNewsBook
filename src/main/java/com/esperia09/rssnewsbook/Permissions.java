@@ -6,5 +6,7 @@ package com.esperia09.rssnewsbook;
 public interface Permissions {
     String PREFIX = "rssnewsbook";
 
-    String USE = PREFIX + ".use";
+    String CONVERT = PREFIX + ".convert";
+    String UPDATE = PREFIX + ".update";
+    String ADMIN_NEWS_ADD = PREFIX + ".admin.news.add";
 }

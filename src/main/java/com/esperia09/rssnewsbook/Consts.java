@@ -5,6 +5,7 @@ package com.esperia09.rssnewsbook;
  */
 public interface Consts {
     public static final String PLUGIN_NAME = "RSSNewsBook";
+    public static final String FMT_ISO8601 = "yyyyMMdd'T'HHmmss.SSSZ";
 
     enum Commands {
         rssnews
