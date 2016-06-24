@@ -2,6 +2,10 @@
 RSSNewsBook
 =======================================
 
+![RSSNewsBook Logo](./www/images/logo.png)
+
+![Eyecatch](./www/images/eyecatch.png)
+
 The plugin is Spigot plugin.
 
 * Tested: v1.10, v1.9.2
