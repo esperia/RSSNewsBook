@@ -1,14 +1,13 @@
 
-RSSNewsBook
-=======================================
-
-![RSSNewsBook Logo](./www/images/logo.png)
+# ![RSSNewsBook Logo](./www/images/logo.png)
 
 ![Eyecatch](./www/images/eyecatch.png)
 
-The plugin is Spigot plugin.
+The plugin is RSS Reader for Minecraft.
 
-* Tested: v1.10, v1.9.2
+[Spigot project page is here.](https://www.spigotmc.org/resources/rssnewsbook.25384/)
+
+
 
 Getting Started
 ---------------------------------------
