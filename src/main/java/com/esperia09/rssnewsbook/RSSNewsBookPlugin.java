@@ -55,13 +55,13 @@ public class RSSNewsBookPlugin extends JavaPlugin {
         ymlConfig = new YamlConfig(this, "config.yml");
         ymlNews = new YamlConfig(this, "news.yml");
 
-        // connect to database
-        try {
-            Connector.getInstance().connect(this);
-        } catch (SQLException e) {
-            this.getLogger().info("Connot connect to database: " + e.getMessage());
-            this.getLogger().info("Using in-memory cache.");
-        }
+//        // connect to database
+//        try {
+//            Connector.getInstance().connect(this);
+//        } catch (SQLException e) {
+//            this.getLogger().info("Connot connect to database: " + e.getMessage());
+//            this.getLogger().info("Using in-memory cache.");
+//        }
 
 //        getServer().getPluginManager().registerEvents(listener, this);
     }
@@ -72,11 +72,11 @@ public class RSSNewsBookPlugin extends JavaPlugin {
 
 //        HandlerList.unregisterAll(listener);
 
-        try {
-            Connector.getInstance().disconnect(this);
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+//        try {
+//            Connector.getInstance().disconnect(this);
+//        } catch (SQLException e) {
+//            e.printStackTrace();
+//        }
     }
 
     @Override
