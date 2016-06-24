@@ -226,7 +226,7 @@ public class RSSNewsBookPlugin extends JavaPlugin {
                     return;
                 }
                 // -> succeeded: register params to config.yml
-                ymlNews.getConfig().set("news", newsList);
+                ymlNews.getConfig().set("news", YamlConfigNews.toMapList(newsList));
                 try {
                     ymlNews.save();
                 } catch (IOException e) {
