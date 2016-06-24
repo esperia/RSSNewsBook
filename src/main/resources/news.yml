@@ -1,5 +1,5 @@
 news:
-- techcrunch:
-    url: "https://techcrunch.com/feed/"
+- mynews:
+    url: "http://esperia.herokuapp.com/rssnewsbook.xml"
   nytimes:
     url: "http://rss.nytimes.com/services/xml/rss/nyt/HomePage.xml"
