@@ -10,6 +10,7 @@ import com.esperia09.rssnewsbook.data.db.Connector;
 import com.esperia09.rssnewsbook.rest.Api;
 import com.esperia09.rssnewsbook.rss.Feed;
 import com.esperia09.rssnewsbook.rss.FeedMessage;
+import com.esperia09.rssnewsbook.utils.TextUtils;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.HoverEvent;
@@ -24,6 +25,7 @@ import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.BookMeta;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.sql.SQLException;
@@ -95,6 +97,11 @@ public class RSSNewsBookPlugin extends JavaPlugin {
                 } else if ("update".equals(subCommand)) {
                     update(player, poppedArgs);
                 } else if ("list".equals(subCommand)) {
+                    if (!player.hasPermission(Permissions.LIST)) {
+                        player.sendMessage(ChatColor.RED + "You do not have permission to use this command!");
+                        return true;
+                    }
+
                     final List<YamlConfigNews> newsList = YamlConfigNews.fromMapList(ymlNews.getConfig().getMapList("news"));
 
                     ArrayList<String> messages = new ArrayList<>();
@@ -107,6 +114,8 @@ public class RSSNewsBookPlugin extends JavaPlugin {
                     player.sendMessage(messages.toArray(new String[messages.size()]));
                 } else if ("add".equals(subCommand)) {
                     add(player, poppedArgs);
+                } else {
+                    return false;
                 }
 
                 return true;
@@ -167,12 +176,12 @@ public class RSSNewsBookPlugin extends JavaPlugin {
             return true;
         }
         if (addingUrl != null) {
-            player.sendMessage("still fetching. Please wait a moment...");
+            player.sendMessage(ChatColor.RED + "still fetching. Please wait a moment...");
             return true;
         }
         if (args.length < 2) {
             // TODO: More Helps
-            player.sendMessage("Require [name] [url]");
+            player.sendMessage(ChatColor.RED + "Require [newsId] [url]");
             return true;
         }
 
@@ -183,7 +192,7 @@ public class RSSNewsBookPlugin extends JavaPlugin {
         try {
             fetchUrl = new URL(url);
         } catch (MalformedURLException e) {
-            player.sendMessage("This is not a URL. Please check your argument.");
+            player.sendMessage(ChatColor.RED + "This is not a URL. Please check your argument.");
             return true;
         }
         addingUrl = fetchUrl;
@@ -212,12 +221,17 @@ public class RSSNewsBookPlugin extends JavaPlugin {
             @Override
             public void onFinish(Feed data, Throwable tr) {
                 if (tr != null) {
-                    player.sendMessage("Cannot got news. (" + tr.getMessage() + ")");
+                    player.sendMessage(ChatColor.RED + String.format(Locale.US, "Cannot got news. (%1$s)", tr.getMessage()));
                     addingUrl = null;
                     return;
                 }
                 // -> succeeded: register params to config.yml
                 ymlNews.getConfig().set("news", newsList);
+                try {
+                    ymlNews.save();
+                } catch (IOException e) {
+                    player.sendMessage(ChatColor.RED + String.format(Locale.US, "Cannot save news. (%1$s)", e.getMessage()));
+                }
                 addingUrl = null;
             }
         });
@@ -245,11 +259,11 @@ public class RSSNewsBookPlugin extends JavaPlugin {
         final ItemStack writtenBookInMainHand = inventory.getItemInMainHand();
         if (writtenBookInMainHand == null) {
             // TODO テストしても通らない。このコード要らないかも
-            player.sendMessage("You have one's hand free.");
+            player.sendMessage(ChatColor.RED + "You have one's hand free.");
             return true;
         }
         if (writtenBookInMainHand.getData().getItemType() != Material.WRITTEN_BOOK) {
-            player.sendMessage(String.format("You must hold %1$s.", Material.WRITTEN_BOOK.name()));
+            player.sendMessage(ChatColor.RED + String.format("You must hold %1$s.", Material.WRITTEN_BOOK.name()));
             return true;
         }
 
@@ -300,7 +314,7 @@ public class RSSNewsBookPlugin extends JavaPlugin {
             @Override
             public void onFinish(Feed data, Throwable tr) {
                 if (tr != null) {
-                    player.sendMessage("Cannot got news. (" + tr.getMessage() + ")");
+                    player.sendMessage(ChatColor.RED + String.format(Locale.US, "Cannot got news. (%1$s)", tr.getMessage()));
                     return;
                 }
 
@@ -310,11 +324,14 @@ public class RSSNewsBookPlugin extends JavaPlugin {
                 for (FeedMessage msg : data.getMessages()) {
                     // make a title
                     final String titleStr = (msg.getTitle() != null) ? msg.getTitle() : "[No Title]";
-                    TextComponent title = new TextComponent(titleStr);
-                    if (msg.getLink() != null) {
+                    final TextComponent title;
+                    if (!TextUtils.isEmpty(msg.getLink())) {
+                        title = new TextComponent(ChatColor.BOLD + "" + ChatColor.UNDERLINE + titleStr);
                         title.setClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, msg.getLink()));
+                        title.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder("Open news link").create()));
+                    } else {
+                        title = new TextComponent(ChatColor.BOLD + titleStr);
                     }
-                    title.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder("Open news link").create()));
 
                     // make a description
                     TextComponent description = new TextComponent('\n' + msg.getDescription());

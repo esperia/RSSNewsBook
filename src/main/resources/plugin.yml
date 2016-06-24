@@ -1,8 +1,14 @@
 name: RSSNewsBook
 main: com.esperia09.rssnewsbook.RSSNewsBookPlugin
-version: 0.0.1
+version: 0.1.0
 author: neske
 commands:
   rssnews:
-    description: Convert Written book to RSS News book
-    usage: /rssnews after hold "Written book" in your's main hand.
+    description: Main RSSNewsBook command
+    usage: |
+      Follow the subcommands
+      §b  list §r... Show registered News
+      §b  convert §r... Your holding the Written_book convert to RSSNewsBook
+      §b  update §r... Update your RSSNewsBook
+      §b  add §r... Register New RSS URL
+

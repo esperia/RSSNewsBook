@@ -1,3 +1,5 @@
 news:
-- netlab:
-    url: "http://rss.rssad.jp/rss/itm/2.0/netlab.xml"
+- techcrunch:
+    url: "https://techcrunch.com/feed/"
+  nytimes:
+    url: "http://rss.nytimes.com/services/xml/rss/nyt/HomePage.xml"
