@@ -25,6 +25,7 @@ import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.BookMeta;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -42,9 +43,7 @@ public class RSSNewsBookPlugin extends JavaPlugin {
     public void onEnable() {
         super.onEnable();
         try {
-            CompatManager cm = new CompatManager(this);
-
-            this.cm = cm;
+            this.cm = new CompatManager(this);
         } catch (final Exception e) {
             this.getLogger().severe("Could not find support for this CraftBukkit version.");
             this.getLogger().info("Check for updates at URL HERE");
@@ -56,6 +55,27 @@ public class RSSNewsBookPlugin extends JavaPlugin {
         // Load configs
         ymlConfig = new YamlConfig(this, "config.yml");
         ymlNews = new YamlConfig(this, "news.yml");
+
+        // Check update
+        if (ymlConfig.getConfig().getBoolean("updater")) {
+            final String currentPluginVersion = getDescription().getVersion();
+            Api.getInstance().reqCanUpdateVersion(this, currentPluginVersion, new Api.ApiCallback<String>() {
+                @Override
+                public void onFinish(String newVersion, Throwable tr) {
+                    if (tr != null) {
+                        getLogger().info(String.format(Locale.US,
+                                "Failed check update: (%1$s) ", tr.getMessage()));
+                    } else {
+                        if (newVersion != null) {
+                            getLogger().info(String.format(Locale.US,
+                                    "New version available!! > v%1$s < (currently:v%2$s)", newVersion, currentPluginVersion));
+                        } else {
+                            // No new version available.
+                        }
+                    }
+                }
+            });
+        }
 
 //        // connect to database
 //        try {

@@ -3,6 +3,7 @@ package com.esperia09.rssnewsbook;
 import static org.junit.Assert.*;
 import com.esperia09.rssnewsbook.data.config.YamlConfig;
 import com.esperia09.rssnewsbook.data.config.YamlConfigNews;
+import com.esperia09.rssnewsbook.utils.YamlUtilsForTest;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.junit.After;
 import org.junit.Before;
@@ -28,7 +29,7 @@ public class YamlTest {
     @Before
     public void setup() throws IOException {
         String path = System.getProperty("user.dir");
-        yamlConfig = new YamlConfig(new File(path, "test.yml"));
+        yamlConfig = new YamlConfig(YamlUtilsForTest.getFile("plugin.yml"));
         System.out.println("testFile=" + yamlConfig.getFile());
 
         yamlConfig.save();

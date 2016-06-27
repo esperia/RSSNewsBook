@@ -2,6 +2,7 @@ package com.esperia09.rssnewsbook.rest;
 
 import com.esperia09.rssnewsbook.rss.Feed;
 import com.esperia09.rssnewsbook.rss.RSSFeedParser;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.Plugin;
 
 import java.io.BufferedReader;
@@ -46,12 +47,30 @@ public class Api {
                 plugin.getServer().getScheduler().runTask(plugin, new Runnable() {
                     @Override
                     public void run() {
-                        if (result == null) {
-                            if (tr == null) {
-                                throw new IllegalStateException("This is Plugin's bug!!");
-                            }
-                            return;
-                        }
+                        callback.onFinish(result, tr);
+                    }
+                });
+            }
+        });
+    }
+
+    public void reqCanUpdateVersion(final Plugin plugin, final String currentVersion, final ApiCallback<String> callback) {
+        plugin.getServer().getScheduler().runTaskAsynchronously(plugin, new Runnable() {
+            @Override
+            public void run() {
+                Exception tmpEx = null;
+                String tmpResult = null;
+                try {
+                    tmpResult = Updater.getNewestVersionIfReleased(currentVersion);
+                } catch (Exception e) {
+                    tmpEx = e;
+                }
+                final Exception tr = tmpEx;
+                final String result = tmpResult;
+
+                plugin.getServer().getScheduler().runTask(plugin, new Runnable() {
+                    @Override
+                    public void run() {
                         callback.onFinish(result, tr);
                     }
                 });
