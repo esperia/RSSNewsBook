@@ -1,12 +1,11 @@
 package com.esperia09.rssnewsbook;
 
-import com.esperia09.rssnewsbook.compat.ICraftBookPageManager;
 import com.esperia09.rssnewsbook.compat.CompatManager;
+import com.esperia09.rssnewsbook.compat.ICraftBookPageManager;
 import com.esperia09.rssnewsbook.compat.RssMeta;
 import com.esperia09.rssnewsbook.data.config.ConfigKeys;
 import com.esperia09.rssnewsbook.data.config.YamlConfig;
 import com.esperia09.rssnewsbook.data.config.YamlConfigNews;
-import com.esperia09.rssnewsbook.data.db.Connector;
 import com.esperia09.rssnewsbook.rest.Api;
 import com.esperia09.rssnewsbook.rss.Feed;
 import com.esperia09.rssnewsbook.rss.FeedMessage;
@@ -25,17 +24,15 @@ import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.BookMeta;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.sql.SQLException;
 import java.text.ParseException;
 import java.util.*;
 
 public class RSSNewsBookPlugin extends JavaPlugin {
     private CompatManager cm;
-//    private MyListener listener = new MyListener();
+    //    private MyListener listener = new MyListener();
     private YamlConfig ymlConfig;
     private YamlConfig ymlNews;
 
@@ -57,8 +54,8 @@ public class RSSNewsBookPlugin extends JavaPlugin {
         ymlNews = new YamlConfig(this, "news.yml");
 
         // Check update
-        if (!ymlConfig.getConfig().isSet("updater")) {
-            ymlConfig.getConfig().set("updater", true);
+        if (!ymlConfig.getConfig().isSet(ConfigKeys.UPDATER)) {
+            ymlConfig.getConfig().set(ConfigKeys.UPDATER, true);
             try {
                 ymlConfig.save();
             } catch (IOException e) {
@@ -66,7 +63,7 @@ public class RSSNewsBookPlugin extends JavaPlugin {
                 e.printStackTrace();
             }
         }
-        if (ymlConfig.getConfig().getBoolean("updater")) {
+        if (ymlConfig.getConfig().getBoolean(ConfigKeys.UPDATER)) {
             final String currentPluginVersion = getDescription().getVersion();
             Api.getInstance().reqCanUpdateVersion(this, currentPluginVersion, new Api.ApiCallback<String>() {
                 @Override
@@ -115,17 +112,17 @@ public class RSSNewsBookPlugin extends JavaPlugin {
         if (sender instanceof Player) {
             final Player player = (Player) sender;
 
-            if (command.getName().startsWith(Consts.Commands.rssnews.name())) {
+            if (command.getName().startsWith(Commands.RSSNEWS)) {
                 if (args.length == 0) {
                     return false;
                 }
                 String subCommand = args[0];
                 String[] poppedArgs = Arrays.copyOfRange(args, 1, args.length);
-                if ("convert".equals(subCommand)) {
+                if (Commands.RSSNEWS_CONVERT.equals(subCommand)) {
                     convert(player, poppedArgs);
-                } else if ("update".equals(subCommand)) {
+                } else if (Commands.RSSNEWS_UPDATE.equals(subCommand)) {
                     update(player, poppedArgs);
-                } else if ("list".equals(subCommand)) {
+                } else if (Commands.RSSNEWS_LIST.equals(subCommand)) {
                     if (!player.hasPermission(Permissions.LIST)) {
                         player.sendMessage(ChatColor.RED + "You do not have permission to use this command!");
                         return true;
@@ -141,7 +138,7 @@ public class RSSNewsBookPlugin extends JavaPlugin {
                                 ChatColor.RESET + news.getUrl()));
                     }
                     player.sendMessage(messages.toArray(new String[messages.size()]));
-                } else if ("add".equals(subCommand)) {
+                } else if (Commands.RSSNEWS_ADD.equals(subCommand)) {
                     add(player, poppedArgs);
                 } else {
                     return false;
