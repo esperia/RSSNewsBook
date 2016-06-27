@@ -1,3 +1,5 @@
 news:
+  # News expire time (sec)
   expire: 10800
+# If set true, Check for updates when plugin enabled.
 updater: true

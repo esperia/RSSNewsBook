@@ -79,7 +79,7 @@ public class RSSNewsBookPlugin extends JavaPlugin {
                             getLogger().info(String.format(Locale.US,
                                     "New version available!! > v%1$s < (currently:v%2$s)", newVersion, currentPluginVersion));
                         } else {
-                            // No new version available.
+                            getLogger().info("No new version available.");
                         }
                     }
                 }
