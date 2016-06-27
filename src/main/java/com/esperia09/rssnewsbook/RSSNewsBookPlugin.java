@@ -57,6 +57,15 @@ public class RSSNewsBookPlugin extends JavaPlugin {
         ymlNews = new YamlConfig(this, "news.yml");
 
         // Check update
+        if (!ymlConfig.getConfig().isSet("updater")) {
+            ymlConfig.getConfig().set("updater", true);
+            try {
+                ymlConfig.save();
+            } catch (IOException e) {
+                this.getLogger().severe(String.format(Locale.US, "Cannot save config.yml (%1$s)", e.getMessage()));
+                e.printStackTrace();
+            }
+        }
         if (ymlConfig.getConfig().getBoolean("updater")) {
             final String currentPluginVersion = getDescription().getVersion();
             Api.getInstance().reqCanUpdateVersion(this, currentPluginVersion, new Api.ApiCallback<String>() {
