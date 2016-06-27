@@ -1,6 +1,2 @@
-db:
-  url: jdbc:mysql://localhost:3306/minecraft_main
-  username: minecraft
-  password: db_password_here
 news:
   expire: 10800
