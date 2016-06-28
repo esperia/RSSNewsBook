@@ -22,7 +22,7 @@ dependencies {
 
 jar {
     if (project.hasProperty('pluginVersion')) {
-        jar.destinationDir = new File('server-' + project.pluginVersion + '/plugins/')
+        jar.destinationDir = new File("server-${project.pluginVersion}/plugins/")
         jar.destinationDir.mkdirs()
     }
 }
