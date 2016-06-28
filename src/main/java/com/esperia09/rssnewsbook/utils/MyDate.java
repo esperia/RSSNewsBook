@@ -8,6 +8,7 @@ import java.util.Date;
  */
 public class MyDate {
     private static final String FMT_YMD = "yyyy/MM/dd";
+    public static final String FMT_ISO8601 = "yyyyMMdd'T'HHmmss.SSSZ";
     //private static final String FMT_YMD = "yyyy/MM/dd HH:mm:ss.SSS";
 
     private static Date sharedFmtDate = new Date();
@@ -19,4 +20,5 @@ public class MyDate {
             return fmtYmd.format(sharedFmtDate);
         }
     }
+
 }

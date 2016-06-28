@@ -1,16 +1,15 @@
 package com.esperia09.rssnewsbook.rest;
 
+import com.esperia09.rssnewsbook.data.storage.MyFileUtils;
 import com.esperia09.rssnewsbook.rss.Feed;
 import com.esperia09.rssnewsbook.rss.RSSFeedParser;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.Plugin;
 
-import java.io.BufferedReader;
-import java.io.DataOutputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.Locale;
 
 /**
  * Created by esperia on 2016/06/05.
@@ -30,14 +29,25 @@ public class Api {
 
     // ------------------------------------------------------------------------
 
-    public void reqReadRss(final Plugin plugin, final String url, final ApiCallback<Feed> callback) {
+    public void reqReadRss(final Plugin plugin, final String newsId, final String url, final ApiCallback<Feed> callback) {
         plugin.getServer().getScheduler().runTaskAsynchronously(plugin, new Runnable() {
             @Override
             public void run() {
                 Exception tmpEx = null;
                 Feed tmpResult = null;
                 try {
-                    tmpResult = reqReadRssSync(url);
+                    RSSFeedParser parser = new RSSFeedParser();
+                    File newsCacheFile;
+                    synchronized (MyFileUtils.class) {
+                        newsCacheFile = MyFileUtils.getNewsCacheFile(plugin, newsId);
+                        if (newsCacheFile.exists()) {
+                            if (!newsCacheFile.delete()) {
+                                throw new IOException(String.format(Locale.US, "Cannot delete cache. %1$s", newsCacheFile.getAbsolutePath()));
+                            }
+                        }
+                        parser.download(url, newsCacheFile);
+                    }
+                    tmpResult = parser.readFeed(newsCacheFile);
                 } catch (IOException e) {
                     tmpEx = e;
                 }
@@ -105,12 +115,6 @@ public class Api {
 //    }
 
     // ------------------------------------------------------------------------
-
-    private Feed reqReadRssSync(String url) throws IOException {
-        RSSFeedParser parser = new RSSFeedParser(url);
-        Feed feed = parser.readFeed();
-        return feed;
-    }
 
 //    private static String doPostSync(String url) throws IOException {
 //        String requestJSON = "JSON文字列";

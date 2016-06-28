@@ -1,10 +1,12 @@
 package com.esperia09.rssnewsbook.rest;
 
 import com.esperia09.rssnewsbook.Consts;
+import com.esperia09.rssnewsbook.data.storage.MyFileUtils;
 import com.esperia09.rssnewsbook.rss.Feed;
 import com.esperia09.rssnewsbook.rss.FeedMessage;
 import com.esperia09.rssnewsbook.rss.RSSFeedParser;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -20,10 +22,10 @@ public class Updater {
      * @param currentVersion
      * @return
      */
-    protected static String getNewestVersionIfReleased(String currentVersion) {
+    protected static String getNewestVersionIfReleased(String currentVersion) throws IOException {
         String url = Consts.URL_UPDATE_CHECK;
-        RSSFeedParser parser = new RSSFeedParser(url);
-        Feed feed = parser.readFeed();
+        RSSFeedParser parser = new RSSFeedParser();
+        Feed feed = parser.readFeed(url);
 
         // Parse version
         List<FeedMessage> messages = feed.getMessages();

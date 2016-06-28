@@ -1,9 +1,12 @@
 package com.esperia09.rssnewsbook.rss;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.file.Files;
 
 import javax.xml.stream.XMLEventReader;
 import javax.xml.stream.XMLInputFactory;
@@ -27,17 +30,39 @@ public class RSSFeedParser {
     static final String PUB_DATE = "pubDate";
     static final String GUID = "guid";
 
-    final URL url;
+    public RSSFeedParser() {
+    }
 
-    public RSSFeedParser(String feedUrl) {
+    public void download(String feedUrl, File saveTo) throws IOException {
         try {
-            this.url = new URL(feedUrl);
+            URL url = new URL(feedUrl);
+
+            // Save to Local from Web
+            Files.copy(url.openStream(), saveTo.toPath());
+
         } catch (MalformedURLException e) {
-            throw new RuntimeException(e);
+            throw e;
+        } catch (IOException e) {
+            throw e;
         }
     }
 
-    public Feed readFeed() {
+    public Feed readFeed(File loadFrom) throws IOException {
+        FileInputStream fis = new FileInputStream(loadFrom);
+        return readFeed(fis);
+    }
+
+    public Feed readFeed(String feedUrl) throws IOException {
+        final URL url;
+        try {
+            url = new URL(feedUrl);
+        } catch (MalformedURLException e) {
+            throw e;
+        }
+        return readFeed(url.openStream());
+    }
+
+    private Feed readFeed(InputStream inputStream) throws IOException {
         Feed feed = null;
         try {
             boolean isFeedHeader = true;
@@ -54,8 +79,7 @@ public class RSSFeedParser {
             // First create a new XMLInputFactory
             XMLInputFactory inputFactory = XMLInputFactory.newInstance();
             // Setup a new eventReader
-            InputStream in = read();
-            XMLEventReader eventReader = inputFactory.createXMLEventReader(in);
+            XMLEventReader eventReader = inputFactory.createXMLEventReader(inputStream);
             // read the XML document
             while (eventReader.hasNext()) {
                 XMLEvent event = eventReader.nextEvent();
@@ -111,7 +135,7 @@ public class RSSFeedParser {
                 }
             }
         } catch (XMLStreamException e) {
-            throw new RuntimeException(e);
+            throw new IOException(e);
         }
         return feed;
     }
@@ -124,13 +148,5 @@ public class RSSFeedParser {
             result = event.asCharacters().getData();
         }
         return result;
-    }
-
-    private InputStream read() {
-        try {
-            return url.openStream();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
     }
 }
