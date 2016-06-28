@@ -6,9 +6,11 @@ import com.esperia09.rssnewsbook.compat.RssMeta;
 import com.esperia09.rssnewsbook.data.config.ConfigKeys;
 import com.esperia09.rssnewsbook.data.config.YamlConfig;
 import com.esperia09.rssnewsbook.data.config.YamlConfigNews;
+import com.esperia09.rssnewsbook.data.storage.MyFileUtils;
 import com.esperia09.rssnewsbook.rest.Api;
 import com.esperia09.rssnewsbook.rss.Feed;
 import com.esperia09.rssnewsbook.rss.FeedMessage;
+import com.esperia09.rssnewsbook.rss.RSSFeedParser;
 import com.esperia09.rssnewsbook.utils.TextUtils;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
@@ -24,6 +26,7 @@ import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.BookMeta;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -166,13 +169,13 @@ public class RSSNewsBookPlugin extends JavaPlugin {
             return true;
         }
 
-        String name = args[0];
+        String newsId = args[0];
 
         // Check name existing.
         final List<YamlConfigNews> newsList = YamlConfigNews.fromMapList(ymlNews.getConfig().getMapList("news"));
         YamlConfigNews existNews = null;
         for (YamlConfigNews news : newsList) {
-            if (name.equals(news.getNewsId())) {
+            if (newsId.equals(news.getNewsId())) {
                 existNews = news;
                 break;
             }
@@ -243,7 +246,7 @@ public class RSSNewsBookPlugin extends JavaPlugin {
         }
 
         // Try fetch
-        Api.getInstance().reqReadRss(this, fetchUrl.toString(), new Api.ApiCallback<Feed>() {
+        Api.getInstance().reqReadRss(this, news.getNewsId(), fetchUrl.toString(), new Api.ApiCallback<Feed>() {
             @Override
             public void onFinish(Feed data, Throwable tr) {
                 if (tr != null) {
@@ -305,15 +308,7 @@ public class RSSNewsBookPlugin extends JavaPlugin {
         }
 
         // Obtain url for fetch.
-        final URL url;
-        if (news != null) {
-            try {
-                url = new URL(news.getUrl());
-            } catch (MalformedURLException e) {
-                player.sendMessage(ChatColor.RED + String.format(Locale.US, "This is not a URL. Please check your argument. (%1$s)", e.getMessage()));
-                return true;
-            }
-        } else {
+        if (news == null) {
             final RssMeta rssMeta;
             try {
                 rssMeta = cbpMgr.getRssMeta();
@@ -323,67 +318,150 @@ public class RSSNewsBookPlugin extends JavaPlugin {
                 return true;
             }
 
-            // Is this expired?
-            long expireTime = rssMeta.lastUpdate.getTime() + (getConfig().getInt(ConfigKeys.NEWS_EXPIRE) * 1000L);
-            if (expireTime < System.currentTimeMillis()) {
-                Date dateTime = new Date(expireTime);
-                player.sendMessage(ChatColor.RED + String.format(Locale.US, "Cannot update until %1$s", dateTime.toString()));
+            final List<YamlConfigNews> newsList = YamlConfigNews.fromMapList(ymlNews.getConfig().getMapList("news"));
+
+            // Migration for (0.1.0-0.1.1) -> (0.2.0)
+            try {
+                new URL(rssMeta.newsId);
+                String url = rssMeta.newsId;
+                // Old format. migrate to newsId
+                // TODO: convert url to newsId
+                for (YamlConfigNews news_ : newsList) {
+                    if (news_.getUrl().equals(url)) {
+                        news = news_;
+                        break;
+                    }
+                }
+            } catch (MalformedURLException e) {
+                // Maybe correctly!
+
+                // newsId to URL.
+                for (YamlConfigNews news_ : newsList) {
+                    if (news_.getNewsId().equals(rssMeta.newsId)) {
+                        news = news_;
+                        break;
+                    }
+                }
+            }
+
+            if (news == null) {
+                player.sendMessage(String.format(Locale.US, "Unknown newsId (%1$s). Try to convert again.", rssMeta.newsId));
                 return true;
             }
-
-            url = rssMeta.url;
         }
 
-        // Request to Web
-        player.sendMessage("Fetching...");
-        Api.getInstance().reqReadRss(this, url.toString(), new Api.ApiCallback<Feed>() {
-            @Override
-            public void onFinish(Feed data, Throwable tr) {
-                if (tr != null) {
-                    player.sendMessage(ChatColor.RED + String.format(Locale.US, "Cannot got news. (%1$s)", tr.getMessage()));
-                    return;
+        // キャッシュを確認して、
+        Feed feed = null;
+        long expireTime = news.getLastUpdate().getTime() + (getConfig().getInt(ConfigKeys.NEWS_EXPIRE) * 1000L);
+        long currentTime = System.currentTimeMillis();
+        if (expireTime >= currentTime) {
+            // Not expired. Use XML Cache.
+            // use saved xml cache.
+            File newsCacheFile;
+            try {
+                newsCacheFile = MyFileUtils.getNewsCacheFile(this, news.getNewsId());
+            } catch (IOException e) {
+                player.sendMessage(ChatColor.RED + "Cannot run your command. Please ask to Server Administrator.");
+                getLogger().severe(e.getMessage());
+                return true;
+            }
+            if (newsCacheFile.exists()) {
+                RSSFeedParser parser = new RSSFeedParser();
+                try {
+                    feed = parser.readFeed(newsCacheFile);
+                } catch (IOException e) {
+                    // ローカルなので、読み込み失敗 == キャッシュが無いとみなす。
+                    getLogger().info(String.format(Locale.US, "Illegal RSS Format (%1$s). Trying fetch from Web...", e.getMessage()));
+                    e.printStackTrace();
                 }
+            }
+        } else {
+            // Expired.
+//            SimpleDateFormat fmt = new SimpleDateFormat(MyDate.FMT_ISO8601);
+//            player.sendMessage(ChatColor.AQUA + String.format(Locale.US,
+//                    "This book already newest. Next update: %1$s", fmt.format(new Date(expireTime))));
+//            return true;
+        }
 
-                // refresh the pages
-                cbpMgr.clear();
+        final YamlConfigNews fixedNews = news;
+        if (feed != null) {
+            writeToBookMeta(cbpMgr, writtenBookMeta, feed, fixedNews);
 
-                for (FeedMessage msg : data.getMessages()) {
-                    // make a title
-                    final String titleStr = (msg.getTitle() != null) ? msg.getTitle() : "[No Title]";
-                    final TextComponent title;
-                    if (!TextUtils.isEmpty(msg.getLink())) {
-                        title = new TextComponent(ChatColor.BOLD + "" + ChatColor.UNDERLINE + titleStr);
-                        title.setClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, msg.getLink()));
-                        title.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder("Open news link").create()));
-                    } else {
-                        title = new TextComponent(ChatColor.BOLD + titleStr);
+            //update the ItemStack with this new meta
+            writtenBookInMainHand.setItemMeta(writtenBookMeta);
+        } else {
+            // Request to Web
+            player.sendMessage("Fetching...");
+            Api.getInstance().reqReadRss(this, fixedNews.getNewsId(), fixedNews.getUrl(), new Api.ApiCallback<Feed>() {
+                @Override
+                public void onFinish(Feed data, Throwable tr) {
+                    if (tr != null) {
+                        player.sendMessage(ChatColor.RED + String.format(Locale.US, "Cannot got news. (%1$s)", tr.getMessage()));
+                        return;
                     }
 
-                    // make a description
-                    TextComponent description = new TextComponent('\n' + msg.getDescription());
+                    writeToBookMeta(cbpMgr, writtenBookMeta, data, fixedNews);
 
-                    //add the page to the list of pages
-                    cbpMgr.add(title, description);
+                    //update the ItemStack with this new meta
+                    writtenBookInMainHand.setItemMeta(writtenBookMeta);
+                    fixedNews.getLastUpdate().setTime(System.currentTimeMillis());
+
+                    // save news.yml
+                    final List<YamlConfigNews> newsList = YamlConfigNews.fromMapList(ymlNews.getConfig().getMapList("news"));
+                    for (YamlConfigNews news : newsList) {
+                        if (fixedNews.getNewsId().equals(news.getNewsId())) {
+                            news.getLastUpdate().setTime(System.currentTimeMillis());
+                            break;
+                        }
+                    }
+                    ymlNews.getConfig().set("news", YamlConfigNews.toMapList(newsList));
+                    try {
+                        ymlNews.save();
+                    } catch (IOException e) {
+                        player.sendMessage(ChatColor.RED + String.format(Locale.US, "Cannot save news. (%1$s)", e.getMessage()));
+                    }
                 }
+            });
+        }
 
-                // save url
-                RssMeta rssMeta = new RssMeta();
-                rssMeta.url = url;
-                rssMeta.lastUpdate = new Date(System.currentTimeMillis());
-                cbpMgr.add(rssMeta.toComponent());
-
-                //set the title and author of this book
-                if (data.getTitle() != null) {
-                    writtenBookMeta.setTitle(data.getTitle());
-                } else {
-                    writtenBookMeta.setTitle("[No Title]");
-                }
-                writtenBookMeta.setAuthor("" + data.getCopyright());
-
-                //update the ItemStack with this new meta
-                writtenBookInMainHand.setItemMeta(writtenBookMeta);
-            }
-        });
         return true;
+    }
+
+    private void writeToBookMeta(ICraftBookPageManager cbpMgr, BookMeta writtenBookMeta, Feed data, YamlConfigNews fixedNews) {
+        // refresh the pages
+        cbpMgr.clear();
+
+        for (FeedMessage msg : data.getMessages()) {
+            // make a title
+            final String titleStr = (msg.getTitle() != null) ? msg.getTitle() : "[No Title]";
+            final TextComponent title;
+            if (!TextUtils.isEmpty(msg.getLink())) {
+                title = new TextComponent(ChatColor.BOLD + "" + ChatColor.UNDERLINE + titleStr);
+                title.setClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, msg.getLink()));
+                title.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder("Open news link").create()));
+            } else {
+                title = new TextComponent(ChatColor.BOLD + titleStr);
+            }
+
+            // make a description
+            TextComponent description = new TextComponent('\n' + msg.getDescription());
+
+            //add the page to the list of pages
+            cbpMgr.add(title, description);
+        }
+
+        // save url
+        RssMeta rssMeta = new RssMeta();
+        rssMeta.newsId = fixedNews.getNewsId();
+        rssMeta.lastUpdate = new Date(System.currentTimeMillis());
+        cbpMgr.add(rssMeta.toComponent());
+
+        //set the title and author of this book
+        if (data.getTitle() != null) {
+            writtenBookMeta.setTitle(data.getTitle());
+        } else {
+            writtenBookMeta.setTitle("[No Title]");
+        }
+        writtenBookMeta.setAuthor("" + data.getCopyright());
     }
 }

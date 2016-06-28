@@ -1,6 +1,7 @@
 package com.esperia09.rssnewsbook.compat;
 
 import com.esperia09.rssnewsbook.Consts;
+import com.esperia09.rssnewsbook.utils.MyDate;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -25,7 +26,7 @@ public abstract class AbstractCraftBookPageManager implements ICraftBookPageMana
         // validates
         int textCount = 0;
         String pluginName = split[0];
-        String url = split[1];
+        String newsId = split[1];
         String lastUpdate = split[2];
         RssMeta rssMeta = new RssMeta();
 
@@ -36,7 +37,7 @@ public abstract class AbstractCraftBookPageManager implements ICraftBookPageMana
         textCount += pluginName.length() + 1;
 
         // Time
-        SimpleDateFormat fmt = new SimpleDateFormat(Consts.FMT_ISO8601);
+        SimpleDateFormat fmt = new SimpleDateFormat(MyDate.FMT_ISO8601);
         try {
             rssMeta.lastUpdate = fmt.parse(lastUpdate);
         } catch (UnsupportedOperationException e) {
@@ -46,12 +47,9 @@ public abstract class AbstractCraftBookPageManager implements ICraftBookPageMana
         }
         textCount += lastUpdate.length() + 1;
 
-        // URL
-        try {
-            rssMeta.url = new URL(url);
-        } catch (MalformedURLException e) {
-            throw new ParseException(e.getMessage(), textCount);
-        }
+        // newsId (v0.1.1 and before: URL)
+        rssMeta.newsId = newsId;
+        textCount += newsId.length() + 1;
 
         return rssMeta;
     }
