@@ -1,6 +1,6 @@
 name: RSSNewsBook
 main: com.esperia09.rssnewsbook.RSSNewsBookPlugin
-version: 0.1.1
+version: 0.1.2
 author: neske
 commands:
   rssnews:
