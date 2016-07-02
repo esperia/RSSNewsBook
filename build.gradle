@@ -21,27 +21,29 @@ dependencies {
 }
 
 jar {
-    if (project.hasProperty('pluginVersion')) {
-        jar.destinationDir = new File("server-${project.pluginVersion}/plugins/")
+    if (project.hasProperty('sv')) {
+        jar.destinationDir = new File("server-${project.sv}/plugins/")
         jar.destinationDir.mkdirs()
     }
 }
 
 task runJar(dependsOn:jar) << {
-    if (project.hasProperty('pluginVersion')) {
+    if (project.hasProperty('sv')) {
         javaexec {
-            main="-jar";
-            workingDir="${projectDir}/server-${project.pluginVersion}"
+            main = "-jar";
+            workingDir = "${projectDir}/server-${project.sv}"
+            standardInput = System.in
             args = [
                     "-Xdebug",
                     "-Xnoagent",
                     "-Djava.compiler=NONE",
                     "-Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005",
                     "-Dfile.encoding=UTF-8",
-                    "${projectDir}/libs/spigot-${project.pluginVersion}.jar",
+                    "${projectDir}/libs/spigot-${project.sv}.jar",
             ]
         }
     } else {
-        throw new IllegalArgumentException("You must be append pluginVersion to command, such as `./gradlew runJar -PpluginVersion=1.10`");
+        throw new IllegalArgumentException("You must be append Server version to command, such as `./gradlew runJar -Psv=1.10`");
     }
 }
+

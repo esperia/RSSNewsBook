@@ -50,8 +50,15 @@ All commands:
 Debug
 ---------------------------------------
 
-* spigot-1.10.jar and spigot-1.9.2.jar put on `/path/to/project_root/libs/`
-* run server:
+* First, spigot-1.10.jar and spigot-1.9.2.jar put on `/path/to/project_root/libs/`
+* Run server:
+
+```sh
+cd /path/to/project_root/
+./gradlew runJar -Psv=1.10
+```
+
+or, using ShellScript (Tested on Mac only):
 
 ```sh
 cd /path/to/project_root/

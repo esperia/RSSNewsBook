@@ -8,7 +8,7 @@ if [ ! -f $script_dir/libs/spigot-${version}.jar ]; then
 fi
 
 cd $script_dir/
-./gradlew jar -PpluginVersion="${version}"
+./gradlew jar -Psv="${version}"
 
 # Run server
 mkdir -p server-${version}
